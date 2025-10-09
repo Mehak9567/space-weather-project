@@ -405,37 +405,62 @@ save energy, and use renewables to repair our Earth. Be a Climate Guardian.">
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
-  <script>
-	  // Wait for user interaction before enabling speech
+<script>
+// Ensure speech is allowed only after a user interaction
+let speechAllowed = false;
 document.addEventListener('click', () => {
-  // Resume speech synthesis (some browsers need this)
+  speechAllowed = true;
   if (window.speechSynthesis.paused) {
     window.speechSynthesis.resume();
   }
 }, { once: true });
 
+// Wait until voices are loaded, then run callback
+function loadVoicesOnce(callback) {
+  const voices = window.speechSynthesis.getVoices();
+  if (voices.length !== 0) {
+    callback();
+  } else {
+    window.speechSynthesis.onvoiceschanged = () => {
+      callback();
+    };
+  }
+}
+
 function speak(text) {
+  if (!speechAllowed) {
+    // Not allowed yet (user hasn't interacted)
+    return;
+  }
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.rate = 1.3;
   utterance.pitch = 5;
   utterance.volume = 1;
   utterance.lang = 'en-US';
+
+  // Optional: listen for error
+  utterance.onerror = (e) => {
+    console.error('Speech error:', e.error);
+  };
+
   window.speechSynthesis.speak(utterance);
 }
 
-const sections = document.querySelectorAll("section");
+// After voices are loaded, observe sections
+loadVoicesOnce(() => {
+  const sections = document.querySelectorAll("section");
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const story = entry.target.getAttribute("data-plotu-story");
+        if (story) speak(story);
+      }
+    });
+  }, { threshold: 0.5 });
 
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      const story = entry.target.getAttribute("data-plotu-story");
-      if (story) speak(story);
-    }
-  });
-}, { threshold: 0.5 });
-
-sections.forEach(section => observer.observe(section));
+  sections.forEach(section => observer.observe(section));
+});
 </script>
 
   
@@ -630,5 +655,6 @@ spaceObserver.observe(spaceInfo);
   </script>
 </body>
 </html>
+
 
 
