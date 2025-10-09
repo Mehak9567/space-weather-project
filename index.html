@@ -287,6 +287,31 @@
 </head>
 
 <body>
+	<!-- Add this just after <body> -->
+<div id="intro-screen" style="
+  position: fixed; inset: 0;
+  background: black; color: white;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  font-size: 1.5rem; z-index: 9999;">
+  <p>🔭 Welcome to Space Weather Project</p>
+  <button id="start-btn" style="
+    padding: 10px 20px; margin-top: 20px;
+    background: #ff7300; border: none; color: white;
+    font-size: 1rem; border-radius: 10px; cursor: pointer;">
+    Start Experience 🚀
+  </button>
+</div>
+
+<script>
+let speechAllowed = false;
+document.getElementById('start-btn').addEventListener('click', () => {
+  speechAllowed = true;
+  window.speechSynthesis.resume();
+  document.getElementById('intro-screen').style.display = 'none';
+});
+</script>
+
   <header> 
     <h1>Visualizing the hidden effects of space weather on our world</h1>
 
@@ -428,24 +453,16 @@ function loadVoicesOnce(callback) {
 }
 
 function speak(text) {
-  if (!speechAllowed) {
-    // Not allowed yet (user hasn't interacted)
-    return;
-  }
+  if (!speechAllowed) return; // Don’t speak until user clicks
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.rate = 1.3;
   utterance.pitch = 5;
   utterance.volume = 1;
   utterance.lang = 'en-US';
-
-  // Optional: listen for error
-  utterance.onerror = (e) => {
-    console.error('Speech error:', e.error);
-  };
-
   window.speechSynthesis.speak(utterance);
 }
+
 
 // After voices are loaded, observe sections
 loadVoicesOnce(() => {
@@ -655,6 +672,7 @@ spaceObserver.observe(spaceInfo);
   </script>
 </body>
 </html>
+
 
 
 
