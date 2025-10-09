@@ -406,6 +406,14 @@ save energy, and use renewables to repair our Earth. Be a Climate Guardian.">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
   <script>
+	  // Wait for user interaction before enabling speech
+document.addEventListener('click', () => {
+  // Resume speech synthesis (some browsers need this)
+  if (window.speechSynthesis.paused) {
+    window.speechSynthesis.resume();
+  }
+}, { once: true });
+
 function speak(text) {
   window.speechSynthesis.cancel();
   const utterance = new SpeechSynthesisUtterance(text);
@@ -622,4 +630,5 @@ spaceObserver.observe(spaceInfo);
   </script>
 </body>
 </html>
+
 
