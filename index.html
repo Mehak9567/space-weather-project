@@ -314,8 +314,8 @@
     <h1>Visualizing the hidden effects of space weather on our world</h1>
 
   <section id="plotu-section" class="hidden-section" style="padding:30px; display:flex; align-items:center; justify-content:center; gap:30px; max-width:1000px; margin:auto;"
-  data-plotu-story="Commander Plotu reporting! Welcome aboard. Let's explore how space weather shapes life on Earth. Do you know what space weather is? It means variations in the near-Earth space environment caused by solar flares and storms.
-  Scroll down to see what happens to our Earth.">
+  data-plotu-story="Commander Plotu reporting — welcome aboard! Today, we’ll journey through the mysteries of space weather, and how it shapes life on Earth.
+       Space weather means changes in the near-Earth environment caused by solar flares and storms.Ready to explore?">
 
   <!-- Left: Character Image -->
   <div style="flex:1; text-align:center;">
@@ -325,9 +325,10 @@
   <!-- Right: Text Block -->
   <div style="flex:2; text-align:left; color:white;">
     <p style="font-size:16px; line-height:1.5;">
-      Commander <strong>Plotu</strong> reporting! Welcome aboard. Let's explore how space weather shapes life on Earth.<br> <b>Do you know what space weather is?</b> 
-       It means variations in the near-Earth space environment caused by solar flares and storms.<br>
-      <div background-color: "skyblue;">Scroll down to see what happens to our Earth.<div>
+      Commander Plotu reporting — welcome aboard! Today, we’ll journey through the mysteries of space weather, and how it shapes life on Earth.<br> 
+       Space weather means changes in the near-Earth environment caused by solar flares and storms.<br> <b> Ready to explore?</b>
+	   
+      <div background-color: "skyblue;">Scroll down and see what happens to our planet.<div>
     </p>
   </div>
   
@@ -659,10 +660,11 @@ startBtn.addEventListener("click", () => {
 
   // 🎙️ Start narration
   const msg = new SpeechSynthesisUtterance(
-    "Commander Plotu reporting! Welcome aboard. Let's explore how space weather shapes life on Earth.Do you know what space weather is?It means variations in the near-Earth space environment caused by solar flares and storms.Scroll down to see what happens to our Earth."
-  );
-  msg.rate = 1.2;
-  msg.pitch = 1.4;
+  "Commander Plotu reporting — welcome aboard! Today, we’ll journey through the mysteries of space weather, and how it shapes life on Earth. Space weather means changes in the near-Earth environment caused by solar flares and storms. Ready to explore? Scroll down and see what happens to our planet."
+);
+
+  msg.rate = 1;
+  msg.pitch = 1.2;
   msg.lang = "en-US";
   window.speechSynthesis.speak(msg);
 
@@ -674,4 +676,5 @@ startBtn.addEventListener("click", () => {
 
 </body>
 </html>
+
 
