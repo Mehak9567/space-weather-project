@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>space weather</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #001f3f, #0074D9);
+      color: white;
+      text-align: center;
+    }
+
+    header {
+      padding: 20px;
+      background: rgba(0,0,0,0.5);
+    }
+
+    header.hidden-section {
+      opacity: 0;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 1.2s ease-out, opacity 0.5s ease-out;
+    }
+    header.show-section {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+
+    
+
+    #chart-container {
+      width: 80%;
+      margin: auto;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 20px;
+    }
+
+    #solutions {
+      margin: 30px;
+    }
+
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .plant { background: green; color: white; }
+    .energy { background: orange; color: white; }
+    .renewable { background: skyblue; color: black; }
+
+.solutions-extra {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* push block to right side */
+  gap: 5px; /* space between text and image */
+  margin: 0px 0; /* reduce extra space above/below */
+}
+
+.text-box {
+  border: 1px solid skyblue;
+  padding: 10px 15px;
+  color: white;
+  max-width: 150px;
+  text-align: left;
+  background: rgba(0,0,0,0.3); /* optional slight bg */
+}
+
+.solutions-extra img {
+  width: 150px; /* adjust size as needed */
+  height: auto;
+}
+
+
+
+    #space-panel {
+      width: 100%;
+      height: 100vh;
+      background: black;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+     
+	 /* Space character + text container */
+.space-info {
+  position: absolute;
+  bottom: 50px;       /* distance from bottom */
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transform: translateX(-100%); /* start off-screen */
+  transition: transform 1.2s ease-out, opacity 1s ease-out;
+  opacity: 0;
+  z-index: 4;
+}
+
+/* Show class when scrolled */
+.space-info.show-section {
+  transform: translateX(20px); /* slide in */
+  opacity: 1;
+}
+
+/* Character image */
+.space-character img {
+  width: 100px;
+  height: auto;
+  border-radius: 10px;
+}
+
+/* Text block */
+.space-text {
+  max-width: 300px;
+  font-size: 16px;
+  line-height: 1;
+  color: white;
+  background: rgba(0,0,0,0.4);
+  padding: 15px;
+  border-radius: 8px;
+}
+
+	 
+	 /* Small Planets */ 
+	 .planets { position: absolute; 
+	 width: 100%; height: 100%; 
+	 background: transparent; z-index: 1; } 
+	 .planets::before { content: " ";
+	 position: absolute;
+	 top: 40%; 
+	 left: 20%;
+	 width: 40px; 
+	 
+	 height: 40px; 
+	 background: radial-gradient(circle, #999 20%, #555 80%);
+	 border-radius: 50%; 
+	 animation: drift 40s linear infinite; } 
+	 .planets::after { content: " "; 
+	 position: absolute;
+	 top: 60%;
+	 right: 15%;
+	 width: 30px;
+
+	 height: 30px; 
+	 background: radial-gradient(circle, #ff9 20%, #cc3 80%);
+	 border-radius: 50%; 
+	 animation: drift2 50s linear infinite; }
+	 
+	 @keyframes drift {
+	 from { transform: translateX(0); }
+	 to { transform: translateX(600px); } } 
+	 
+	 @keyframes drift2 { 
+	 from { transform: translateX(0); } 
+	 to { transform: translateX(-600px); } }
+	 
+	 /* Solar Flare */
+.solar-flare {
+    position: absolute;
+    top: 40%;           /* starting vertical position */
+    left: -100px;       /* start off-screen from left */
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle, #ff6600, #ff0000);
+    border-radius: 50%;
+    box-shadow: 0 0 30px 15px orange, 0 0 60px 30px red;
+    z-index: 2;
+    animation: flareMove 50s linear infinite;
+}
+
+/* Animation toward Earth */
+@keyframes flareMove {
+    0% { transform: translateX(0) scale(1); opacity: 1; }
+    50% { transform: translateX(50vw) scale(1.2); opacity: 0.9; }
+    100% { transform: translateX(100vw) scale(1.5); opacity: 0; }
+}
+
+	 
+	 #earth {
+      width: 200px;
+      margin: 20px auto;
+      transition: filter 2s ease;
+      border-radius: 50%;
+      animation: rotateEarth 30s linear infinite;
+      z-index: 2;
+    }
+	 
+	 
+	 
+     /* Aurora neon arcs */
+.aurora-half-ring {
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  top: 50%;
+  left: 50%; /* shift to right side */
+  transform: translate(-50%, -50%) rotate(127deg);
+  border-radius: 50%;
+  border-bottom: none;        /* only top half */
+  filter: blur(8px) brightness(1.5);
+  z-index: 1;
+  pointer-events: none;
+  animation: pulseAurora 2s ease-in-out infinite alternate;
+}
+
+.aurora-pink { border-top: 5px deeppink; }
+.aurora-green { border-top: 5px solid lime; }
+.aurora-yellow { border-top: 5px solid yellow; }
+
+/* Soft glowing pulse animation */
+@keyframes pulseAurora {
+  0%   { filter: blur(6px) brightness(1.2); }
+  50%  { filter: blur(10px) brightness(1.8); }
+  100% { filter: blur(8px) brightness(0.7); }
+}
+
+/* Earth rotation keyframes */
+@keyframes rotateEarth {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+	 
+    .stars { position: absolute; width: 100%; height: 100%; background: transparent; overflow: hidden; z-index: 0; }
+    .star { position: absolute; background: white; border-radius: 50%; opacity: 0.8; animation: twinkle 2s infinite ease-in-out alternate; }
+    @keyframes twinkle { from { opacity: 0.2; transform: scale(0.8); } to { opacity: 1; transform: scale(1.2); } }
+
+    .ozone-layer {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 280px;
+      height: 280px;
+      border: 5px solid skyblue;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      clip-path: inset(0% 0 0 0);  
+      transition: clip-path 1s linear; 
+      z-index: 3;
+    }
+
+    .uv-rays { position: absolute; top: -100px; left: 50%; pointer-events: none; }
+
+    .uv-ray {
+      position: absolute;
+      width: 0.6cm; height: 1cm;
+      stroke: yellow; stroke-width: 3px; fill: none;
+      opacity: 0; animation: uvFall 1.5s linear forwards;
+      filter: drop-shadow(0 0 5px yellow);
+    }
+
+    @keyframes uvFall {
+      0%   { transform: translateY(0); opacity: 1; }
+      70%  { transform: translateY(100px); opacity: 0.8; }
+      100% { transform: translateY(200px); opacity: 0; }
+    }
+
+    .bars { position: absolute; right: 50px; top: 20%; color: white; font-family: sans-serif; font-size: 14px; text-align: left; }
+
+    .bar { margin: 10px 0; }
+    .bar span { display: inline-block; width: 80px; }
+    .bar div { display: inline-block; height: 15px; background: red; vertical-align: middle; }
+    .oxygen div { background: green; }
+
+    .hidden-section { opacity: 0; transform: translateY(50px); transition: opacity 0.7s ease-out, transform 0.7s ease-out; }
+    .show-section { opacity: 1; transform: translateY(0); }
+
+    .typewriter { display: inline-block; border-right: 2px solid white; white-space: nowrap; overflow: hidden; width: 0; }
+    .typewriter.active { animation: typing 3s steps(30, end) forwards, blink 0.75s step-end; }
+    @keyframes typing { from { width: 0 } to { width: 28% } }
+    @keyframes blink { 50% { border-color: transparent } }
+  </style>
+</head>
+
+<body>
+ <!-- 🔭 Space Mission Intro Overlay -->
+<div id="mission-intro" style="
+  position:fixed; inset:0;
+  background:radial-gradient(circle at 50% 30%, #000020 0%, #000 100%);
+  color:#fff; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  z-index:9999; text-align:center;
+  font-family:'Orbitron', sans-serif;
+">
+  <h1 style="font-size:2rem; margin-bottom:10px;">🪐 Space Weather Mission</h1>
+  <p style="font-size:1.1rem; opacity:.8;">Prepare for launch into the effects of solar storms</p>
+  <button id="startMissionBtn" style="
+    margin-top:25px; padding:12px 28px;
+    border:none; border-radius:8px;
+    background:#ff7300; color:white; font-size:1rem;
+    cursor:pointer; box-shadow:0 0 15px #ff7300;
+    transition:transform .3s ease;
+  " onmouseover="this.style.transform='scale(1.1)'" 
+     onmouseout="this.style.transform='scale(1)'">
+    🚀 Start Mission
+  </button>
+</div>
+
+  <header> 
+    <h1>Visualizing the hidden effects of space weather on our world</h1>
+
+  <section id="plotu-section" class="hidden-section" style="padding:30px; display:flex; align-items:center; justify-content:center; gap:30px; max-width:1000px; margin:auto;"
+  data-plotu-story="Commander Plotu reporting — welcome aboard! Today, we’ll journey through the mysteries of space weather, and how it shapes life on Earth.
+       Space weather means changes in the near-Earth environment caused by solar flares and storms.Ready to explore?">
+
+  <!-- Left: Character Image -->
+  <div style="flex:1; text-align:center;">
+    <a href="https://ibb.co/JwjpkTvj"><img src="https://i.ibb.co/DHfMKF9f/plotu.png" alt="plotu" border="0" style="width:150px; display:block; margin:auto;"></a>
+  </div>
+
+  <!-- Right: Text Block -->
+  <div style="flex:2; text-align:left; color:white;">
+    <p style="font-size:16px; line-height:1.5;">
+      Commander Plotu reporting — welcome aboard! Today, we’ll journey through the mysteries of space weather, and how it shapes life on Earth.<br> 
+       Space weather means changes in the near-Earth environment caused by solar flares and storms.<br> <b> Ready to explore?</b>
+	   
+      <div background-color: "skyblue;">Scroll down and see what happens to our planet.<div>
+    </p>
+  </div>
+  
+</section>
+
+  </header>
+
+  <section id="space-panel" class="hidden-section"   data-plotu-story="Look at the space around Earth. 
+  Solar flares and radiation affect satellite communications, power grids, navigation systems, 
+      and can even increase radiation exposure for astronauts and high-altitude flights. 
+      It impacts the daily lives of people on Earth by disrupting GPS and communication systems, 
+      causing power outages, and a lot of health issues. Let me show you how space weather changes everything.">
+    <div id="stars"></div>
+    <div class="planets"></div>
+	<!-- Solar Flare -->
+<div class="solar-flare"></div>
+
+      
+	  <div class="earth-wrapper">
+     <!-- Overlapping neon half-ring auroras -->
+<div class="aurora-half-ring aurora-deeppink"></div>
+<div class="aurora-half-ring aurora-green"></div>
+<div class="aurora-half-ring aurora-yellow"></div>
+
+<img id="earth" src="https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg" alt="Earth">
+<div class="ozone-layer"></div>
+<div class="uv-rays" id="uv-rays"></div>
+
+</div>
+
+
+
+
+    <div class="bars">
+      <div class="bar"><span>CO₂</span><div id="co2" style="width:20px;"></div></div>
+      <div class="bar"><span>CFCs</span><div id="cfcs" style="width:10px;"></div></div>
+      <div class="bar"><span>Methane</span><div id="ch4" style="width:15px;"></div></div>
+      <div class="bar oxygen"><span>Oxygen</span><div id="oxygen" style="width:120px;"></div></div>
+    </div>
+	<!-- Inside #space-panel, add this at the bottom -->
+<div id="space-info" class="space-info hidden-section ">
+  <!-- Character Image -->
+  <div class="space-character">
+    <a href="https://ibb.co/6RBYFR43"><img src="https://i.ibb.co/HDd7qDrW/e84423b3-9840-4722-a6c6-3373b1aeb770.png" alt="e84423b3-9840-4722-a6c6-3373b1aeb770" border="0"></a><br />
+	<a target='_blank' href='https://imgbb.com/'></a><br />
+  </div>
+  <!-- Text Box -->
+  <div class="space-text">
+    <p>
+      Look at the space around Earth. 
+      Solar flares and radiation affect satellite communications, power grids, navigation systems, 
+      and can even increase radiation exposure for astronauts and high-altitude flights. 
+      It impacts the daily lives of people on Earth by disrupting GPS and communication systems, 
+      causing power outages, and a lot of health issues. Let me show you how space weather changes everything
+    </p>
+  </div>
+</div>
+
+  </section>
+
+  <section id="chart-container" class="hidden-section"  data-plotu-story="Here, you can see the global temperature change.
+  NASA data shows how our planet is warming due to space and human activities.">
+    <h2>Global Temperature Change</h2>
+    <div id="current-year" style="color:white; text-align:center; font-size:18px; margin-bottom:10px;">Year: 2020</div>
+	<div id="nasa-data" style="
+        text-align: center; 
+        color: #00f0ff; 
+        font-size: 16px; 
+        font-weight: bold;
+        margin-bottom: 10px;
+    ">
+      📡Based on real NASA space weather data
+    </div>
+    <canvas id="climateChart"></canvas>
+    <div id="story-panel" style="margin-top:15px; font-size:16px; color:#fff;"></div> <!-- NEW: Story panel -->
+  </section>
+
+  <section id="solutions" class="hidden-section" data-plotu-story="Now, it’s your turn to help! Plant trees, 
+save energy, and use renewables to repair our Earth. Be a Climate Guardian.">
+
+  <h2>Be a Climate Guardian 🌱⚡🌞</h2>
+  
+  <!-- Extra image + text block -->
+  <div class="solutions-extra">
+    <div class="text-box">
+      Click on the buttons to repair our Earth
+    </div>
+    <a href="https://ibb.co/27Z2jM5J">
+      <img src="https://i.ibb.co/TBWXH0ry/02817e6a-0e5f-4d25-b43a-eb50d70a7c54.png" alt="Earth Image" border="0">
+    </a>
+  </div>
+  
+  <button class="plant" onclick="plantTrees()">🌱 Plant Trees</button>
+  <button class="energy" onclick="saveEnergy()">💡 Save Energy</button>
+  <button class="renewable" onclick="useRenewables()">🌞 Use Renewables</button>
+</section>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <script>
+function speak(text) {
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 1.3;
+  utterance.pitch = 5;
+  utterance.volume = 1;
+  utterance.lang = 'en-US';
+  window.speechSynthesis.speak(utterance);
+}
+
+const sections = document.querySelectorAll("section");
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const story = entry.target.getAttribute("data-plotu-story");
+      if (story) speak(story);
+    }
+  });
+}, { threshold: 0.5 });
+
+sections.forEach(section => observer.observe(section));
+</script>
+
+  
+  <script>
+  // Slide-up on scroll
+  const solutionsExtra = document.querySelector('.solutions-extra');
+  const solutionsObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        solutionsExtra.classList.add('show');
+      }
+    });
+  }, { threshold: 0.3 });
+
+  solutionsObserver.observe(solutionsExtra);
+</script>
+  <script> // Observe space panel info for slide-in
+const spaceInfo = document.getElementById("space-info");
+const spaceObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting){
+      spaceInfo.classList.add("show-section");
+    } else {
+      spaceInfo.classList.remove("show-section");
+    }
+  });
+}, { threshold: 0.3 });
+spaceObserver.observe(spaceInfo);
+</script>
+
+
+
+  <script>
+  window.addEventListener("DOMContentLoaded", () => {
+
+    // 🌡 Multi-year NASA data
+    const nasaDataYears = {};
+    const monthlyLabels = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+    for(let year=2020; year<=2025; year++){
+      nasaDataYears[year] = {};
+      monthlyLabels.forEach(m => { nasaDataYears[year][m] = +(20 + Math.random()*10).toFixed(2); });
+    }
+
+    // 🌟 Stars animation
+    const starsContainer = document.getElementById("stars");
+    for (let i = 0; i < 50; i++) {
+      const star = document.createElement("div");
+      star.classList.add("star");
+      let size = Math.random() * 3 + 1;
+      star.style.width = `${size}px`;
+      star.style.height = `${size}px`;
+      star.style.top = `${Math.random() * 100}%`;
+      star.style.left = `${Math.random() * 100}%`;
+      star.style.animationDuration = `${2 + Math.random() * 3}s`;
+      starsContainer.appendChild(star);
+    }
+
+    // 🌍 Pollutant bars
+    let co2 = 20, cfcs = 10, ch4 = 15, oxygen = 120;
+    function updateBars() {
+      co2 += 2; cfcs += 1; ch4 += 1.5; oxygen -= 1;
+      document.getElementById("co2").style.width = co2 + "px";
+      document.getElementById("cfcs").style.width = cfcs + "px";
+      document.getElementById("ch4").style.width = ch4 + "px";
+      document.getElementById("oxygen").style.width = oxygen + "px";
+    }
+    setInterval(updateBars, 2000);
+
+    // 🌍 Earth, ozone, UV
+    const ozone = document.querySelector('.ozone-layer');
+    const earth = document.getElementById("earth");
+    const uvContainer = document.querySelector(".uv-rays");
+    let depletionLevel = 0;
+    setTimeout(() => {
+      setInterval(() => {
+        if (depletionLevel <= 100) {
+          depletionLevel += 0.2;
+          ozone.style.clipPath = `inset(${depletionLevel}% 0 0 0)`;
+          const redFilter = depletionLevel / 100;
+          earth.style.filter =
+            `hue-rotate(${redFilter * 250}deg) saturate(${1 + redFilter * 10}) brightness(${1 - redFilter * 0.9})`;
+
+          if (depletionLevel > 0) {
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("class", "uv-ray");
+            svg.setAttribute("viewBox", "0 0 20 80");
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+            path.setAttribute("points", "10,0 0,30 20,50 10,80");
+            path.setAttribute("stroke", "yellow");
+            path.setAttribute("stroke-width", "2");
+            path.setAttribute("fill", "none");
+            svg.appendChild(path);
+            svg.style.left = (Math.random() * 70 - 35) + "px";
+            uvContainer.appendChild(svg);
+            setTimeout(() => svg.remove(), 1500);
+          }
+        }
+      }, 800);
+    }, 2000);
+
+    // 🌱 Buttons
+    function plantTrees() { alert("🌱 Trees planted! Earth is cooling."); earth.style.filter = "hue-rotate(-30deg)"; }
+    function saveEnergy() { alert("💡 Energy saved! Less pollution."); earth.style.filter = "brightness(1.2)"; }
+    function useRenewables() { alert("🌞 Renewable energy activated!"); earth.style.filter = "saturate(2)"; }
+    window.plantTrees = plantTrees;
+    window.saveEnergy = saveEnergy;
+    window.useRenewables = useRenewables;
+
+    // 📊 Chart.js setup
+    const ctx = document.getElementById('climateChart').getContext('2d');
+    const climateChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: monthlyLabels,
+        datasets: [{
+          label: 'Temperature at 2m (°C)',
+          data: monthlyLabels.map(m => nasaDataYears[2020][m]),
+          borderColor: 'red',
+          backgroundColor: 'rgba(255,0,0,0.3)',
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive:true,
+        plugins:{ legend:{labels:{color:"white"}} },
+        scales:{ 
+          x:{ticks:{color:"white"},grid:{color:"rgba(255,255,255,0.2)"}},
+          y:{ticks:{color:"white"},grid:{color:"rgba(255,255,255,0.2)"}}
+        },
+        animation: { duration: 0 } 
+      }
+    });
+
+    // 🔄 Cinematic month-by-month smooth transition + Story Panel
+    const yearDisplay = document.getElementById("current-year");
+    const storyPanel = document.getElementById("story-panel"); // NEW
+    const years = Object.keys(nasaDataYears);
+    let yearIndex = 0, monthIndex = 0;
+    let currentData = monthlyLabels.map(m => nasaDataYears[years[yearIndex]][m]);
+
+    function lerp(a,b,t){ return a + (b-a)*t; }
+
+    function animateChart(){
+      const nextMonthIndex = (monthIndex + 1) % 12;
+      const t = 0.08;
+      currentData[monthIndex] = lerp(currentData[monthIndex], nasaDataYears[years[yearIndex]][monthlyLabels[nextMonthIndex]], t);
+
+      climateChart.data.datasets[0].data = currentData;
+      climateChart.update();
+
+      // Update story panel
+      storyPanel.textContent = `🌟 ${monthlyLabels[monthIndex]} ${years[yearIndex]}: Temp ~ ${currentData[monthIndex].toFixed(1)}°C, UV intensity`;
+
+      if(Math.abs(currentData[monthIndex] - nasaDataYears[years[yearIndex]][monthlyLabels[nextMonthIndex]]) < 0.05){
+        monthIndex++;
+        if(monthIndex >= 12){
+          monthIndex = 0;
+          yearIndex = (yearIndex + 1) % years.length;
+          yearDisplay.textContent = `Year: ${years[yearIndex]}`;
+        }
+      }
+      requestAnimationFrame(animateChart);
+    }
+    animateChart();
+
+    // Animate chart on visibility
+    const chartSection = document.getElementById("chart-container");
+    const chartObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting){ climateChart.reset(); climateChart.update(); }
+      });
+    }, { threshold: 0.5 });
+    chartObserver.observe(chartSection);
+
+    // Typewriter + sections animation
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const heading = entry.target.querySelector('.typewriter');
+        if(entry.isIntersecting){
+          entry.target.classList.add('show-section');
+          if(heading){ heading.classList.remove('active'); setTimeout(() => heading.classList.add('active'), 800); }
+        } else {
+          entry.target.classList.remove('show-section');
+          if(heading){ heading.classList.remove('active'); heading.style.width="0"; heading.style.borderRight="2px solid white"; }
+        }
+      });
+    }, { threshold: 0.3 });
+    document.querySelectorAll('.hidden-section').forEach(el => observer.observe(el));
+
+  });
+  </script>
+  <script>
+const intro = document.getElementById("mission-intro");
+const startBtn = document.getElementById("startMissionBtn");
+let missionStarted = false;
+
+startBtn.addEventListener("click", () => {
+  if (missionStarted) return;
+  missionStarted = true;
+
+  // Fade-out intro overlay
+  intro.style.transition = "opacity 1.5s ease";
+  intro.style.opacity = "0";
+  setTimeout(() => intro.remove(), 1500);
+
+  // 🎙️ Start narration
+  const msg = new SpeechSynthesisUtterance(
+  "Commander Plotu reporting — welcome aboard! Today, we’ll journey through the mysteries of space weather, and how it shapes life on Earth. Space weather means changes in the near-Earth environment caused by solar flares and storms. Ready to explore? Scroll down and see what happens to our planet."
+);
+
+  msg.rate = 1;
+  msg.pitch = 1.2;
+  msg.lang = "en-US";
+  window.speechSynthesis.speak(msg);
+
+  // Optional visual effect
+  document.body.style.transition = "background 2s ease-in-out";
+  document.body.style.background = "linear-gradient(to bottom, #000010, #003366)";
+});
+</script>
+
+</body>
+</html>
+
+
