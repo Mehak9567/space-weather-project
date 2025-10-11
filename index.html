@@ -648,22 +648,25 @@ startBtn.addEventListener("click", () => {
   document.body.style.transition = "background 2s ease-in-out";
   document.body.style.background = "linear-gradient(to bottom, #000010, #003366)";
 });
-</script>
 
-<script>
-// 🧠 Stop narration when user switches tab, minimizes window, or reloads
 window.addEventListener("visibilitychange", () => {
   if (document.hidden) {
-    window.speechSynthesis.cancel();
+    window.speechSynthesis.pause();
+  } else {
+    window.speechSynthesis.resume();
   }
 });
 
-// 🌀 Stop narration if the page is being unloaded (reload/close)
+// Always start from top on reload
 window.addEventListener("beforeunload", () => {
-  window.speechSynthesis.cancel();
+  window.scrollTo(0, 0);
 });
-</script>
 
+window.addEventListener("load", () => {
+  window.scrollTo(0, 0);
+});
+
+</script>
 
 </body>
 </html>
