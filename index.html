@@ -425,59 +425,6 @@ save energy, and use renewables to repair our Earth. Be a Climate Guardian.">
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
-  <script>
-function speak(text) {
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.rate = 1;
-  utterance.pitch = 5;
-  utterance.volume = 1;
-  utterance.lang = 'en-US';
-  window.speechSynthesis.speak(utterance);
-}
-
-const sections = document.querySelectorAll("section");
-
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      const story = entry.target.getAttribute("data-plotu-story");
-      if (story) speak(story);
-    }
-  });
-}, { threshold: 0.5 });
-
-sections.forEach(section => observer.observe(section));
-</script>
-
-  
-  <script>
-  // Slide-up on scroll
-  const solutionsExtra = document.querySelector('.solutions-extra');
-  const solutionsObserver = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if(entry.isIntersecting){
-        solutionsExtra.classList.add('show');
-      }
-    });
-  }, { threshold: 0.3 });
-
-  solutionsObserver.observe(solutionsExtra);
-</script>
-  <script> // Observe space panel info for slide-in
-const spaceInfo = document.getElementById("space-info");
-const spaceObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if(entry.isIntersecting){
-      spaceInfo.classList.add("show-section");
-    } else {
-      spaceInfo.classList.remove("show-section");
-    }
-  });
-}, { threshold: 0.3 });
-spaceObserver.observe(spaceInfo);
-</script>
-
 
 
   <script>
@@ -640,38 +587,87 @@ spaceObserver.observe(spaceInfo);
 
   });
   </script>
-  <script>
+<script>
+let currentUtterance = null;
+let missionStarted = false;
+
+function speak(text) {
+  // Stop any ongoing narration smoothly before starting a new one
+  if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+    window.speechSynthesis.cancel();
+  }
+
+  currentUtterance = new SpeechSynthesisUtterance(text);
+  currentUtterance.rate = 1;
+  currentUtterance.pitch = 1;
+  currentUtterance.volume = 1;
+  currentUtterance.lang = 'en-US';
+  window.speechSynthesis.speak(currentUtterance);
+}
+
+// ✅ Create observers only after mission starts
+function initVoiceObservers() {
+  const sections = document.querySelectorAll("section");
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && missionStarted) {
+        const story = entry.target.getAttribute("data-plotu-story");
+        if (story) speak(story);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  sections.forEach(section => observer.observe(section));
+}
+</script>
+
+<script>
 const intro = document.getElementById("mission-intro");
 const startBtn = document.getElementById("startMissionBtn");
-let missionStarted = false;
 
 startBtn.addEventListener("click", () => {
   if (missionStarted) return;
   missionStarted = true;
 
-  // Fade-out intro overlay
+  // Fade out overlay
   intro.style.transition = "opacity 1.5s ease";
   intro.style.opacity = "0";
   setTimeout(() => intro.remove(), 1500);
 
-  // 🎙️ Start narration
-  const msg = new SpeechSynthesisUtterance(
-  "Commander Plotu reporting — welcome aboard! Today, we’ll journey through the mysteries of space weather, and how it shapes life on Earth. Space weather means changes in the near-Earth environment caused by solar flares and storms, Ready to explore?, Scroll down and see what happens to our planet"
-);
+  // First voice narration
+  const firstSpeech =
+    "Commander Plotu reporting — welcome aboard! Today, we’ll journey through the mysteries of space weather, and how it shapes life on Earth. Space weather means changes in the near-Earth environment caused by solar flares and storms. Ready to explore? Scroll down and see what happens to our planet.";
+  speak(firstSpeech);
 
-  msg.rate = 1;
-  msg.pitch = 1.2;
-  msg.lang = "en-US";
-  window.speechSynthesis.speak(msg);
+  // Start observers slightly later to avoid conflict with intro narration
+  setTimeout(() => {
+    initVoiceObservers();
+  }, 3000);
 
-  // Optional visual effect
+  // Visual transition
   document.body.style.transition = "background 2s ease-in-out";
   document.body.style.background = "linear-gradient(to bottom, #000010, #003366)";
 });
 </script>
 
+<script>
+// 🧠 Stop narration when user switches tab, minimizes window, or reloads
+window.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    window.speechSynthesis.cancel();
+  }
+});
+
+// 🌀 Stop narration if the page is being unloaded (reload/close)
+window.addEventListener("beforeunload", () => {
+  window.speechSynthesis.cancel();
+});
+</script>
+
+
 </body>
 </html>
+
 
 
 
